@@ -1,0 +1,14 @@
+{
+  "name": "castellarano-cover-center",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test.js && node scripts/qr.test.js",
+    "card": "node scripts/make-assets.mjs",
+    "set-password": "node scripts/set-password.mjs"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}
