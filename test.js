@@ -43,6 +43,8 @@ try {
   const after = await (await fetch(B + '/')).text();
   assert.match(after, /Mario/); assert.match(after, /★★★★☆/); assert.match(after, /&lt;b&gt;x&lt;\/b&gt;/); assert.doesNotMatch(after, /m@x\.it/);
   assert.equal((await post('/review', rev, { origin: 'http://evil.com' })).status, 403);
+  assert.equal((await post('/review', rev, { origin: 'not a url' })).status, 403); // must not crash
+  assert.equal((await post('/review', rev, { origin: 'null', 'sec-fetch-site': 'same-origin' })).status, 303);
   await post('/secret-test-path-x', { op: 'cat_save', id: 0, pos: 0, icon: 'car', title_it: 'Nuova', title_en: 'NewCat', desc_it: 'x', desc_en: 'y', csrf }, { cookie });
   assert.match(await (await fetch(B + '/en')).text(), /NewCat/);
   await post('/secret-test-path-x', { op: 'settings_save', phoneDisplay: '+39 111 222 3333', email: 'a@b.it', instagram: 'https://instagram.com/x', hoursText: 'Mo-Sa 09:00-19:30', announce_it: 'Ciao', announce_en: '', csrf }, { cookie });

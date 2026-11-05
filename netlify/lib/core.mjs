@@ -35,7 +35,13 @@ const redirect = (to, h = {}) => new Response(null, { status: 303, headers: { Lo
 const CDN = { 'Cache-Control': 'public, max-age=0, must-revalidate', 'Netlify-CDN-Cache-Control': 'public, durable, s-maxage=60, stale-while-revalidate=300' };
 const str = (p, k, max) => String(p.get(k) ?? '').trim().slice(0, max);
 const now = () => new Date().toISOString().slice(0, 19).replace('T', ' ');
-const sameOrigin = (req) => { const o = req.headers.get('origin'); return !o || new URL(o).host === new URL(req.url).host; };
+// Browsers may send "Origin: null" (e.g. with no-referrer pages); then trust Sec-Fetch-Site. Never throw on odd values.
+export function sameOrigin(req) {
+  const o = req.headers.get('origin'), site = req.headers.get('sec-fetch-site');
+  if (site && site !== 'same-origin' && site !== 'none') return false;
+  if (!o || o === 'null') return true;
+  try { return new URL(o).host === new URL(req.url).host; } catch { return false; }
+}
 const sha = (v) => crypto.createHash('sha256').update(v).digest('hex');
 const safeEq = (a, b) => typeof a === 'string' && typeof b === 'string' && a.length === b.length && crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
 const mask = (e) => e.replace(/^(.)(.*)(.@)/, (_, a, m, b) => a + '*'.repeat(Math.max(3, m.length)) + b);

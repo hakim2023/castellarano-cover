@@ -43,6 +43,13 @@ assert.equal(r.status, 303); assert.match(r.headers.get('set-cookie'), /alang=ar
 const ar = await (await get(A, { cookie: 'alang=ar' })).text();
 assert.match(ar, /dir="rtl"/); assert.match(ar, /تسجيل الدخول/);
 
+// Origin header edge cases (bug seen live: "Origin: null" crashed the login function)
+let nul = await handleLogin(form('/api/admin-login', { password: 'correct horse' }, { origin: 'null', 'sec-fetch-site': 'same-origin' }));
+assert.equal(nul.status, 303); assert.match(nul.headers.get('set-cookie') || '', /^sid=/, 'Origin: null from the same site can log in');
+assert.equal((await handleLogin(form('/api/admin-login', { password: 'correct horse' }, { origin: 'null', 'sec-fetch-site': 'cross-site' }))).status, 403);
+assert.equal((await handleLogin(form('/api/admin-login', { password: 'x' }, { origin: 'not a url' }))).status, 403);
+assert.match((await handleReview(form('/review', rev, { origin: 'null' }))).headers.get('location'), /r=ok/);
+
 // wrong / right password, forged cookie, CSRF
 assert.match((await handleLogin(form('/api/admin-login', { password: 'nope' }))).headers.get('location'), /m=wrongPw/);
 assert.match(await (await get(A + '?m=wrongPw')).text(), /Password errata/);

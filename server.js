@@ -266,8 +266,11 @@ const server = http.createServer(async (req, res) => {
 
     if (!isRead && req.method !== 'POST') return send(req, res, 405, 'Method Not Allowed', 'text/plain');
     if (req.method === 'POST') {
-      const o = req.headers.origin;
-      if (o && new URL(o).host !== req.headers.host) return send(req, res, 403, 'Forbidden', 'text/plain');
+      // "Origin: null" happens with no-referrer pages: then trust Sec-Fetch-Site. Never throw on odd values.
+      const o = req.headers.origin, site = req.headers['sec-fetch-site'];
+      let ok = !site || site === 'same-origin' || site === 'none';
+      if (ok && o && o !== 'null') { try { ok = new URL(o).host === req.headers.host; } catch { ok = false; } }
+      if (!ok) return send(req, res, 403, 'Forbidden', 'text/plain');
       if (p === '/review') return await postReview(req, res);
       if (p === A) return await admin(req, res);
       return send(req, res, 404, 'Not found', 'text/plain');
