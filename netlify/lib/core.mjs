@@ -136,18 +136,19 @@ export async function handleSite(req, context = {}) {
 // ---- admin page ----
 async function admin(req, s, A) {
   const url = new URL(req.url), lang = adminLang(req.url, req.headers.get('cookie') || '');
-  // ?lang= switches the admin language and remembers it
-  if (url.searchParams.has('lang') && !url.searchParams.has('reset')) return redirect(A, { ...NS, 'Set-Cookie': `alang=${lang}; Path=${A}; Max-Age=31536000; SameSite=Lax; Secure` });
+  // ?lang= switches the admin language and remembers it. No redirect: Netlify keeps the query string on
+  // relative redirects, so redirecting to the same path looped forever ("too many redirects").
+  const LH = url.searchParams.has('lang') ? { ...NS, 'Set-Cookie': `alang=${lang}; Path=${A}; Max-Age=31536000; SameSite=Lax; Secure` } : NS;
   const hash = await currentHash(s), sess = session(req, hash);
   const notice = NOTICES.includes(url.searchParams.get('m')) ? url.searchParams.get('m') : '';
   const mailOpts = { resetAction: RESET_PATH, adminEmail: mask(biz.adminEmail) };
   await applySettings(s);
   if (req.method === 'GET' || req.method === 'HEAD') {
     const token = url.searchParams.get('reset');
-    if (token) return html(adminResetForm(A, { lang, token, valid: await resetTokenOk(s, token), action: RESET_PATH }), 200, NS);
-    if (!sess) return html(adminLogin(A, { lang, notice, action: LOGIN_PATH, ...mailOpts }), 200, NS);
+    if (token) return html(adminResetForm(A, { lang, token, valid: await resetTokenOk(s, token), action: RESET_PATH }), 200, LH);
+    if (!sess) return html(adminLogin(A, { lang, notice, action: LOGIN_PATH, ...mailOpts }), 200, LH);
     const reviews = (await allReviews(s)).sort((a, b) => (b.status === 'pending') - (a.status === 'pending') || b.created_at.localeCompare(a.created_at)); // pending first, then newest
-    return html(adminPanel(A, sess.csrf, { reviews, cats: await getCats(s) }, { lang, notice, biz, ...mailOpts }), 200, NS);
+    return html(adminPanel(A, sess.csrf, { reviews, cats: await getCats(s) }, { lang, notice, biz, ...mailOpts }), 200, LH);
   }
   if (req.method !== 'POST' || !sameOrigin(req)) return text('Forbidden', 'text/plain', 403, NS);
   const form = await req.formData();

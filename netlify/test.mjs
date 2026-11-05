@@ -38,8 +38,9 @@ assert.doesNotMatch(await (await get('/')).text(), /Mario/);
 const loginPage = await (await get(A)).text();
 assert.match(loginPage, /action="\/api\/admin-login"/); assert.match(loginPage, /Password dimenticata/); assert.match(loginPage, /h\*+5@gmail\.com/);
 assert.doesNotMatch(loginPage, /hawkdown15@gmail\.com/, 'full admin email must not be shown');
+// no redirect on ?lang= (Netlify keeps the query on redirects -> it looped live)
 r = await get(A + '?lang=ar');
-assert.equal(r.status, 303); assert.match(r.headers.get('set-cookie'), /alang=ar/);
+assert.equal(r.status, 200); assert.match(r.headers.get('set-cookie'), /alang=ar/); assert.match(await r.text(), /dir="rtl"/);
 const ar = await (await get(A, { cookie: 'alang=ar' })).text();
 assert.match(ar, /dir="rtl"/); assert.match(ar, /تسجيل الدخول/);
 
