@@ -4,12 +4,15 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "test": "node test.js && node scripts/qr.test.js",
+    "test": "node test.js && node scripts/qr.test.js && node netlify/test.mjs",
     "card": "node scripts/make-assets.mjs",
     "set-password": "node scripts/set-password.mjs",
     "build:static": "node scripts/build-static.mjs"
   },
   "engines": {
     "node": ">=22.13"
+  },
+  "dependencies": {
+    "@netlify/blobs": "11.1.6"
   }
 }

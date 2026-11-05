@@ -274,8 +274,8 @@ export function privacy(c, t) {
 
 const adminHead = (title) => `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>${title}</title><link rel="stylesheet" href="/style.css?v=${asset.v}"></head><body class="admin">`;
 
-export function adminLogin(A, error) {
-  return `${adminHead('Admin')}<main class="wrap narrow"><h1>Admin</h1>${error ? `<p class="flash bad" role="alert">${esc(error)}</p>` : ''}<form class="form" method="post" action="${A}"><input type="hidden" name="op" value="login"><label>Password<input type="password" name="password" required maxlength="200" autocomplete="current-password"></label><button class="btn" type="submit">Log in</button></form></main></body></html>`;
+export function adminLogin(A, error, action = A) {
+  return `${adminHead('Admin')}<main class="wrap narrow"><h1>Admin</h1>${error ? `<p class="flash bad" role="alert">${esc(error)}</p>` : ''}<form class="form" method="post" action="${action}"><input type="hidden" name="op" value="login"><label>Password<input type="password" name="password" required maxlength="200" autocomplete="current-password"></label><button class="btn" type="submit">Log in</button></form></main></body></html>`;
 }
 
 const sel = (name, opts, cur) => `<select name="${name}">${opts.map(([v, l]) => `<option value="${v}"${String(v) === String(cur) ? ' selected' : ''}>${l}</option>`).join('')}</select>`;

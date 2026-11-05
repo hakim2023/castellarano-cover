@@ -64,6 +64,10 @@ const card = `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>
 <p class="note">Vendita solo in negozio</p></section>
 </body></html>`;
 fs.writeFileSync(path.join(out, 'business-card.html'), card);
+// Standalone QR: SVG for print (scales to any size), PNG rendered below for screens/social posts.
+fs.writeFileSync(path.join(out, 'qr-code.svg'), qrSvg(qrUrl));
+const qrPage = path.join(os.tmpdir(), 'cover-qr.html');
+fs.writeFileSync(qrPage, `<!doctype html><html><body style="margin:0">${qrSvg(qrUrl).replace('<svg ', '<svg width="1024" height="1024" ')}</body></html>`);
 
 // Social share image 1200x630.
 const og = `<!doctype html><html><head><meta charset="utf-8"><style>${base}
@@ -114,9 +118,13 @@ try {
   await load(ogFile);
   const ogShot = await send('Page.captureScreenshot', { format: 'jpeg', quality: 86, clip: { x: 0, y: 0, width: 1200, height: 630, scale: 1 } });
   fs.writeFileSync(path.join(root, 'public/img/og.jpg'), Buffer.from(ogShot.data, 'base64'));
+  await send('Emulation.setDeviceMetricsOverride', { width: 1024, height: 1024, deviceScaleFactor: 1, mobile: false });
+  await load(qrPage);
+  const qrShot = await send('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width: 1024, height: 1024, scale: 1 } });
+  fs.writeFileSync(path.join(out, 'qr-code.png'), Buffer.from(qrShot.data, 'base64'));
   ws.close();
   console.log('QR points to:', qrUrl);
-  console.log('Wrote print/business-card-print.pdf, print/business-card-front.png, print/business-card-back.png, public/img/og.jpg');
+  console.log('Wrote print/business-card-print.pdf, print/business-card-front.png, print/business-card-back.png, print/qr-code.svg, print/qr-code.png, public/img/og.jpg');
 } finally {
   chrome.kill();
 }

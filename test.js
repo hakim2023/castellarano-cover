@@ -7,7 +7,9 @@ for (const f of ['server.js', 'views.js', 'config.js', 'icons.js', 'package.json
 fs.cpSync('public', path.join(dir, 'public'), { recursive: true });
 const salt = crypto.randomBytes(16);
 fs.writeFileSync(path.join(dir, '.env'), `SITE_URL=http://localhost:3111\nADMIN_PATH=/secret-test-path-x\nADMIN_HASH=${salt.toString('hex')}:${crypto.scryptSync('pw123', salt, 64).toString('hex')}\n`);
-const srv = spawn('node', ['server.js'], { cwd: dir, env: { ...process.env, PORT: 3111 }, stdio: 'ignore' });
+// Drop real deployment settings (e.g. on Netlify builds) so the test server uses the temp .env above.
+const { ADMIN_PATH, ADMIN_HASH, SITE_URL, DATA_DIR, ...cleanEnv } = process.env;
+const srv = spawn('node', ['server.js'], { cwd: dir, env: { ...cleanEnv, PORT: 3111 }, stdio: 'ignore' });
 await new Promise((r) => setTimeout(r, 1200));
 const B = 'http://localhost:3111';
 const post = (p, o, h = {}) => fetch(B + p, { method: 'POST', redirect: 'manual', headers: { 'content-type': 'application/x-www-form-urlencoded', ...h }, body: new URLSearchParams(o) });
