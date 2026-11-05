@@ -7,7 +7,8 @@ import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import { biz } from './config.js';
 import { ICON_CHOICES } from './icons.js';
-import { asset, home, privacy, adminLogin, adminPanel, notFound, sitemap, robots, llms, T } from './views.js';
+import { asset, home, privacy, notFound, sitemap, robots, llms, T } from './views.js';
+import { adminLogin, adminPanel, adminLang, NOTICES } from './admin-views.js';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const envFile = path.join(root, '.env');
@@ -50,14 +51,17 @@ const UPLOADS = path.join(DATA, 'uploads');
 fs.mkdirSync(UPLOADS, { recursive: true });
 
 // Seed product categories once; the owner edits them from admin afterwards.
-if (!db.prepare('SELECT 1 FROM categories').get()) {
+function seedCategories() {
   const icons = ['smartphone', 'shield-check', 'plug-zap', 'battery-charging', 'headphones', 'car'];
   T.it.cats.forEach(([ti, di], i) => db.prepare('INSERT INTO categories(pos,icon,title_it,title_en,desc_it,desc_en) VALUES(?,?,?,?,?,?)').run(i, icons[i], ti, T.en.cats[i][0], di, T.en.cats[i][1]));
 }
+if (!db.prepare('SELECT 1 FROM categories').get()) seedCategories();
 // Editable settings override config.js defaults.
 const SETTING_KEYS = ['phoneDisplay', 'email', 'instagram', 'hoursText', 'announce_it', 'announce_en'];
 biz.announce_it = ''; biz.announce_en = '';
+const DEFAULTS = Object.fromEntries(SETTING_KEYS.map((k) => [k, biz[k] ?? '']));
 function applySettings() {
+  Object.assign(biz, DEFAULTS);
   for (const { key, value } of db.prepare('SELECT key,value FROM settings').all()) if (SETTING_KEYS.includes(key)) biz[key] = value;
   biz.phone = '+' + biz.phoneDisplay.replace(/\D/g, '');
 }
@@ -174,15 +178,18 @@ const csrfOk = (s, given) => s && given.length === s.csrf.length && crypto.timin
 
 async function admin(req, res) {
   const NS = { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' };
-  const s = session(req);
+  const s = session(req), url = new URL(req.url, BASE), lang = adminLang(req.url, req.headers.cookie || '');
   if (req.method === 'GET' || req.method === 'HEAD') {
-    return send(req, res, 200, s ? adminPanel(A, s.csrf, { reviews: q.all.all(), cats: q.cats.all() }) : adminLogin(A), undefined, NS);
+    // ?lang= switches the admin language and remembers it
+    if (url.searchParams.has('lang')) return redirect(res, A, { ...NS, 'Set-Cookie': `alang=${lang}; Path=${A}; Max-Age=31536000; SameSite=Lax${SECURE ? '; Secure' : ''}` });
+    const notice = NOTICES.includes(url.searchParams.get('m')) ? url.searchParams.get('m') : '';
+    return send(req, res, 200, s ? adminPanel(A, s.csrf, { reviews: q.all.all(), cats: q.cats.all() }, { lang, notice, biz }) : adminLogin(A, { lang, notice }), undefined, NS);
   }
   const { p, file } = await readForm(req, 5.5 * 1024 * 1024);
   const op = p.get('op');
   if (op === 'login') {
-    if (limited('login:' + clientIp(req), 5, 15 * 60e3)) return send(req, res, 429, adminLogin(A, 'Too many attempts. Try again in 15 minutes.'), undefined, NS);
-    if (!passwordOk(str(p, 'password', 200))) return send(req, res, 401, adminLogin(A, 'Wrong password.'), undefined, NS);
+    if (limited('login:' + clientIp(req), 5, 15 * 60e3)) return send(req, res, 429, adminLogin(A, { lang, notice: 'tooMany' }), undefined, NS);
+    if (!passwordOk(str(p, 'password', 200))) return send(req, res, 401, adminLogin(A, { lang, notice: 'wrongPw' }), undefined, NS);
     const id = crypto.randomBytes(32).toString('hex');
     sessions.set(id, { csrf: crypto.randomBytes(24).toString('hex'), exp: Date.now() + 2 * 3600e3 });
     return redirect(res, A, { ...NS, 'Set-Cookie': `sid=${id}; HttpOnly; SameSite=Strict; Path=${A}; Max-Age=7200${SECURE ? '; Secure' : ''}` });
@@ -199,26 +206,40 @@ async function admin(req, res) {
     return ICON_CHOICES.includes(icon) && v[2] && v[3] ? v : null;
   };
   if (op === 'logout') { sessions.delete(s.id); return redirect(res, A, { ...NS, 'Set-Cookie': `sid=; Path=${A}; Max-Age=0` }); }
-  if (op === 'review_save' && q.one.get(id)) {
-    const old = q.one.get(id), r = rev();
-    if (r) {
-      let photo = old.photo;
-      const np = savePhoto(file);
-      if (np || p.get('remove_photo')) { dropPhoto(old.photo); photo = np; }
-      q.update.run(r.name, r.rating, r.body, r.status, photo, id);
-    }
-  } else if (op === 'review_delete') { dropPhoto(q.one.get(id)?.photo); q.del.run(id); }
-  else if (op === 'review_add') { const r = rev(); if (r) q.insert2.run(r.name, '', r.rating, r.body, r.status, savePhoto(file)); }
-  else if (op === 'cat_save') { const v = cat(); if (v) (id ? q.catUpd.run(...v, id) : q.catIns.run(...v)); }
-  else if (op === 'cat_delete') q.catDel.run(id);
-  else if (op === 'settings_save') {
-    const phoneDisplay = str(p, 'phoneDisplay', 30), email = str(p, 'email', 120), instagram = str(p, 'instagram', 200);
-    if (phoneDisplay.replace(/\D/g, '').length >= 8 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) && /^https:\/\//.test(instagram)) {
-      for (const [k, v] of Object.entries({ phoneDisplay, email, instagram, hoursText: str(p, 'hoursText', 400), announce_it: str(p, 'announce_it', 160), announce_en: str(p, 'announce_en', 160) })) q.setting.run(k, v);
-      applySettings();
-    }
+  const done = (m) => redirect(res, `${A}?m=${m}`, NS);
+  const old = Number.isInteger(id) && id > 0 ? q.one.get(id) : undefined;
+  if (op === 'review_status' && old && ['approved', 'pending', 'hidden'].includes(p.get('status'))) {
+    q.update.run(old.name, old.rating, old.body, p.get('status'), old.photo, id);
+    return done('saved');
   }
-  redirect(res, A, NS);
+  if (op === 'review_save' && old) {
+    const r = rev();
+    if (!r) return done('invalid');
+    let photo = old.photo;
+    const np = savePhoto(file);
+    if (np || p.get('remove_photo')) { dropPhoto(old.photo); photo = np; }
+    q.update.run(r.name, r.rating, r.body, r.status, photo, id);
+    return done('saved');
+  }
+  if (op === 'review_delete') { dropPhoto(old?.photo); q.del.run(id); return done('deleted'); }
+  if (op === 'review_add') { const r = rev(); if (!r) return done('invalid'); q.insert2.run(r.name, '', r.rating, r.body, r.status, savePhoto(file)); return done('saved'); }
+  if (op === 'cat_save') { const v = cat(); if (!v) return done('invalid'); id ? q.catUpd.run(...v, id) : q.catIns.run(...v); return done('saved'); }
+  if (op === 'cat_delete') { q.catDel.run(id); return done('deleted'); }
+  if (op === 'settings_save') {
+    const phoneDisplay = str(p, 'phoneDisplay', 30), email = str(p, 'email', 120), instagram = str(p, 'instagram', 200);
+    if (phoneDisplay.replace(/\D/g, '').length < 8 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || !/^https:\/\//.test(instagram)) return done('invalid');
+    for (const [k, v] of Object.entries({ phoneDisplay, email, instagram, hoursText: str(p, 'hoursText', 400), announce_it: str(p, 'announce_it', 160), announce_en: str(p, 'announce_en', 160) })) q.setting.run(k, v);
+    applySettings();
+    return done('saved');
+  }
+  if (op === 'reset_defaults' && p.get('confirm') === '1') {
+    // back to config.js values and the original products; reviews are kept
+    db.exec('DELETE FROM settings; DELETE FROM categories;');
+    seedCategories();
+    applySettings();
+    return done('resetDone');
+  }
+  done('invalid');
 }
 
 // ---- public review ----

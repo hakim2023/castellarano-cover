@@ -3,6 +3,8 @@ export const biz = {
   phone: '+393889004487',
   phoneDisplay: '+39 388 900 4487',
   email: 'kamalkettaf@gmail.com',
+  // Admin password reset links are emailed only to this address (never shown publicly).
+  adminEmail: 'hawkdown15@gmail.com',
   instagram: 'https://www.instagram.com/cover.castellarano',
   mapsShort: 'https://maps.app.goo.gl/mfkCA6o4S1EmAhsC8',
   street: 'Via Radici Nord, 31',

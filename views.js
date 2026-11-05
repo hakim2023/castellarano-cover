@@ -1,5 +1,5 @@
 import { biz } from './config.js';
-import { icon, ICON_CHOICES } from './icons.js';
+import { icon } from './icons.js';
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const json = (o) => JSON.stringify(o).replace(/</g, '\\u003c');
@@ -270,63 +270,6 @@ ${hours}
 export function privacy(c, t) {
   return `${head(c, t, { title: t.pTitle, desc: t.pTitle, path: t.privacy })}<body>${header(t, false)}
 <main id="main" class="sec"><div class="wrap prose"><h1>${t.pTitle.split('|')[0]}</h1>${t.pBody.map(([h, p]) => `<h2>${h}</h2><p>${esc(p)}</p>`).join('')}<p><a href="${t.home}">${t.back}</a></p></div></main>${footer(t)}</body></html>`;
-}
-
-const adminHead = (title) => `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>${title}</title><link rel="stylesheet" href="/style.css?v=${asset.v}"></head><body class="admin">`;
-
-export function adminLogin(A, error, action = A) {
-  return `${adminHead('Admin')}<main class="wrap narrow"><h1>Admin</h1>${error ? `<p class="flash bad" role="alert">${esc(error)}</p>` : ''}<form class="form" method="post" action="${action}"><input type="hidden" name="op" value="login"><label>Password<input type="password" name="password" required maxlength="200" autocomplete="current-password"></label><button class="btn" type="submit">Log in</button></form></main></body></html>`;
-}
-
-const sel = (name, opts, cur) => `<select name="${name}">${opts.map(([v, l]) => `<option value="${v}"${String(v) === String(cur) ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
-const RATINGS = [5, 4, 3, 2, 1].map((n) => [n, '★'.repeat(n) + '☆'.repeat(5 - n)]);
-const STATUSES = [['approved', 'Published'], ['pending', 'Pending'], ['hidden', 'Hidden']];
-
-export function adminPanel(A, csrf, { reviews, cats }, notice = '') {
-  const hid = (op, extra = '') => `<input type="hidden" name="op" value="${op}"><input type="hidden" name="csrf" value="${csrf}">${extra}`;
-  const idf = (id) => `<input type="hidden" name="id" value="${id}">`;
-  const pending = reviews.filter((r) => r.status === 'pending').length;
-  const reviewCard = (r) => `<article class="acard">
-<form method="post" action="${A}" enctype="multipart/form-data" class="aform">${hid('review_save', idf(r.id))}
-<p class="ameta wide"><span class="pill ${r.status}">${r.status}</span> <small>#${r.id} · ${esc(r.created_at)} · ${esc(r.email) || 'no email (added by admin)'}</small></p>
-<label>Name<input name="name" value="${esc(r.name)}" required maxlength="40"></label>
-<label>Rating${sel('rating', RATINGS, r.rating)}</label>
-<label>Status${sel('status', STATUSES, r.status)}</label>
-<label class="wide">Comment<textarea name="body" required minlength="10" maxlength="600" rows="3">${esc(r.body)}</textarea></label>
-${r.photo ? `<img class="athumb" src="/uploads/${r.photo}" alt="" width="120" height="90"><label class="check"><input type="checkbox" name="remove_photo" value="1"> <span>Remove photo</span></label>` : ''}
-<label class="wide">${r.photo ? 'Replace photo' : 'Photo (optional, JPG/PNG/WebP, max 4 MB)'}<input type="file" name="photo" accept="image/jpeg,image/png,image/webp"></label>
-<button class="btn small" type="submit">Save</button></form>
-<form method="post" action="${A}">${hid('review_delete', idf(r.id))}<button class="btn small danger" type="submit">${icon('trash-2')} Delete</button></form></article>`;
-  const catCard = (x) => `<article class="acard"><form method="post" action="${A}" class="aform">${hid('cat_save', idf(x.id))}
-<label>Order<input type="number" name="pos" value="${x.pos}" min="0" max="999"></label><label>Icon${sel('icon', ICON_CHOICES.map((i) => [i, i]), x.icon)}</label>
-<label>Title (IT)<input name="title_it" value="${esc(x.title_it)}" required maxlength="60"></label><label>Title (EN)<input name="title_en" value="${esc(x.title_en)}" required maxlength="60"></label>
-<label>Text (IT)<input name="desc_it" value="${esc(x.desc_it)}" maxlength="160"></label><label>Text (EN)<input name="desc_en" value="${esc(x.desc_en)}" maxlength="160"></label>
-<button class="btn small" type="submit">Save</button></form>
-<form method="post" action="${A}">${hid('cat_delete', idf(x.id))}<button class="btn small danger" type="submit">${icon('trash-2')} Delete</button></form></article>`;
-  return `${adminHead('Admin')}<main class="wrap">
-<div class="adminbar"><h1>Admin</h1><nav class="anav"><a href="#reviews">Reviews${pending ? ` (${pending} pending)` : ''}</a><a href="#cats">Products</a><a href="#settings">Settings</a><a href="/" target="_blank" rel="noopener">View site</a></nav>
-<form method="post" action="${A}">${hid('logout')}<button class="btn small ghost" type="submit">Log out</button></form></div>
-${notice ? `<p class="flash ok" role="status">${esc(notice)}</p>` : ''}
-<h2 id="reviews">Reviews</h2><p class="sub">Customer reviews start as Pending. Publish, hide, edit, add a photo, or delete any of them.</p>
-${reviews.map(reviewCard).join('') || '<p>No reviews yet.</p>'}
-<form class="form aform" method="post" action="${A}" enctype="multipart/form-data"><h3 class="wide">Add a review (only real ones you collected)</h3>${hid('review_add')}
-<label>Name<input name="name" required maxlength="40"></label><label>Rating${sel('rating', RATINGS, 5)}</label><label>Status${sel('status', STATUSES, 'approved')}</label>
-<label class="wide">Comment<textarea name="body" required minlength="10" maxlength="600" rows="3"></textarea></label>
-<label class="wide">Photo (optional)<input type="file" name="photo" accept="image/jpeg,image/png,image/webp"></label><button class="btn small" type="submit">Add</button></form>
-<h2 id="cats">Products shown on the site</h2>${cats.map(catCard).join('')}
-<form class="form aform" method="post" action="${A}"><h3 class="wide">Add a product category</h3>${hid('cat_save', idf(0))}
-<label>Order<input type="number" name="pos" value="99" min="0" max="999"></label><label>Icon${sel('icon', ICON_CHOICES.map((i) => [i, i]), 'smartphone')}</label>
-<label>Title (IT)<input name="title_it" required maxlength="60"></label><label>Title (EN)<input name="title_en" required maxlength="60"></label>
-<label>Text (IT)<input name="desc_it" maxlength="160"></label><label>Text (EN)<input name="desc_en" maxlength="160"></label><button class="btn small" type="submit">Add</button></form>
-<h2 id="settings">Site settings</h2>
-<form class="form aform" method="post" action="${A}">${hid('settings_save')}
-<label>Phone (shown)<input name="phoneDisplay" value="${esc(biz.phoneDisplay)}" required maxlength="30"></label>
-<label>Email<input type="email" name="email" value="${esc(biz.email)}" required maxlength="120"></label>
-<label class="wide">Instagram URL<input type="url" name="instagram" value="${esc(biz.instagram)}" required maxlength="200"></label>
-<label class="wide">Opening hours (one per line, like Mo-Sa 09:00-19:30; empty = hidden)<textarea name="hoursText" rows="4" maxlength="400">${esc(biz.hoursText)}</textarea></label>
-<label class="wide">Announcement banner (IT, empty = none)<input name="announce_it" value="${esc(biz.announce_it)}" maxlength="160"></label>
-<label class="wide">Announcement banner (EN)<input name="announce_en" value="${esc(biz.announce_en)}" maxlength="160"></label>
-<button class="btn small" type="submit">Save settings</button></form></main></body></html>`;
 }
 
 export const notFound = (c, t = T.it) => `${head(c, t, { title: '404 | ' + biz.name, desc: '404', path: '/', noindex: true })}<body>${header(t, false)}<main class="sec"><div class="wrap prose"><h1>404</h1><p><a href="/">${biz.name}</a></p></div></main></body></html>`;

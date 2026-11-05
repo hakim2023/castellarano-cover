@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import crypto from 'node:crypto';
 import assert from 'node:assert/strict';
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cover-'));
-for (const f of ['server.js', 'views.js', 'config.js', 'icons.js', 'package.json']) fs.copyFileSync(f, path.join(dir, f));
+for (const f of ['server.js', 'views.js', 'admin-views.js', 'config.js', 'icons.js', 'package.json']) fs.copyFileSync(f, path.join(dir, f));
 fs.cpSync('public', path.join(dir, 'public'), { recursive: true });
 const salt = crypto.randomBytes(16);
 fs.writeFileSync(path.join(dir, '.env'), `SITE_URL=http://localhost:3111\nADMIN_PATH=/secret-test-path-x\nADMIN_HASH=${salt.toString('hex')}:${crypto.scryptSync('pw123', salt, 64).toString('hex')}\n`);
@@ -48,6 +48,15 @@ try {
   await post('/secret-test-path-x', { op: 'settings_save', phoneDisplay: '+39 111 222 3333', email: 'a@b.it', instagram: 'https://instagram.com/x', hoursText: 'Mo-Sa 09:00-19:30', announce_it: 'Ciao', announce_en: '', csrf }, { cookie });
   const h = await (await fetch(B + '/')).text();
   assert.match(h, /tel:\+391112223333/); assert.match(h, /Mo-Sa 09:00-19:30/); assert.match(h, /class="announce"/);
+  // quick hide/publish, then reset to initial settings (needs the confirm box; reviews kept)
+  await post('/secret-test-path-x', { op: 'review_status', id: 1, status: 'hidden', csrf }, { cookie });
+  assert.doesNotMatch(await (await fetch(B + '/')).text(), /Mario/);
+  await post('/secret-test-path-x', { op: 'review_status', id: 1, status: 'approved', csrf }, { cookie });
+  assert.match((await post('/secret-test-path-x', { op: 'reset_defaults', csrf }, { cookie })).headers.get('location'), /m=invalid/);
+  assert.match((await post('/secret-test-path-x', { op: 'reset_defaults', confirm: '1', csrf }, { cookie })).headers.get('location'), /m=resetDone/);
+  const fresh = await (await fetch(B + '/en')).text();
+  assert.match(fresh, /tel:\+393889004487/); assert.doesNotMatch(fresh, /NewCat|class="announce"/); assert.match(fresh, /Mario/);
+  assert.match(await (await fetch(B + '/secret-test-path-x?lang=ar', { redirect: 'manual' })).headers.get('set-cookie'), /alang=ar/);
   await post('/secret-test-path-x', { op: 'review_delete', id: 1, csrf }, { cookie });
   assert.doesNotMatch(await (await fetch(B + '/')).text(), /Mario/);
   assert.equal((await fetch(B + '/uploads/' + photo)).status, 404); // photo file removed with review
