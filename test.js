@@ -16,6 +16,7 @@ const post = (p, o, h = {}) => fetch(B + p, { method: 'POST', redirect: 'manual'
 try {
   const home = await (await fetch(B + '/')).text();
   assert.match(home, /application\/ld\+json/); assert.match(home, /Via Radici Nord/);
+  assert.match(home, /search\.google\.com\/local\/writereview\?placeid=ChIJ4YrdQwD9f0cRwze_2II61zE/); assert.match(home, /class="scrollcue"/);
   assert.equal((await fetch(B + '/admin')).status, 404);
   assert.equal((await fetch(B + '/en')).status, 200);
   assert.equal((await fetch(B + '/../server.js')).status, 404);

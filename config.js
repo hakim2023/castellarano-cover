@@ -7,6 +7,9 @@ export const biz = {
   adminEmail: 'hawkdown15@gmail.com',
   instagram: 'https://www.instagram.com/cover.castellarano',
   mapsShort: 'https://maps.app.goo.gl/mfkCA6o4S1EmAhsC8',
+  // Google place: ftid 0x477ffd0043dd8ae1:0x31d73a82d8bf37c3 (from the Maps link). Used for the review buttons.
+  googlePlaceId: 'ChIJ4YrdQwD9f0cRwze_2II61zE',
+  googleCid: '3591403561507829699',
   street: 'Via Radici Nord, 31',
   zip: '42014',
   city: 'Castellarano',

@@ -24,6 +24,7 @@ let r = await get('/');
 assert.equal(r.status, 200); const home = await r.text();
 assert.match(home, /application\/ld\+json/); assert.match(home, /action="\/review"/); assert.match(r.headers.get('content-security-policy'), /frame-ancestors 'none'/);
 assert.equal((await get('/en')).status, 200);
+assert.match(home, /search\.google\.com\/local\/writereview\?placeid=ChIJ4YrdQwD9f0cRwze_2II61zE/); assert.match(home, /class="scrollcue"/);
 assert.equal((await get('/nope')).status, 404);
 assert.equal((await get('/admin')).status, 404);
 

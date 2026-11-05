@@ -13,3 +13,12 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
   addEventListener('resize', check);
   check();
 }
+
+// "Scroll" cue: visible only while the visitor is at the very top of the page.
+const cue = document.querySelector('.scrollcue');
+if (cue) {
+  cue.hidden = false;
+  const update = () => cue.classList.toggle('gone', scrollY > 40);
+  addEventListener('scroll', update, { passive: true });
+  update();
+}

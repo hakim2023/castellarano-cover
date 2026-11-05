@@ -9,6 +9,8 @@ export const mapEmbed = `https://www.google.com/maps?q=${q}&output=embed`;
 export const mapLink = `https://www.google.com/maps/search/?api=1&query=${q}`;
 // Set by server.js at startup from a hash of the CSS/JS so browsers fetch new versions after updates.
 export const asset = { v: '' };
+export const googleWrite = () => `https://search.google.com/local/writereview?placeid=${biz.googlePlaceId}`;
+export const googlePlace = () => `https://www.google.com/maps/place/?q=place_id:${biz.googlePlaceId}`;
 const wa = (txt) => `https://wa.me/${biz.phone.slice(1)}?text=${encodeURIComponent(txt)}`;
 
 // Real photos of the shop. [file, width, height, alt IT, alt EN]
@@ -52,6 +54,8 @@ const T = {
     galleryK: 'Il negozio', galleryH: 'Dentro Castellarano Cover Center', gallerySub: 'Pareti piene di cover e vetrine di accessori: ecco cosa ti aspetta.',
     reviewsK: 'Recensioni', reviewsH: 'Cosa dicono i clienti', noReviews: 'Ancora nessuna recensione pubblicata. Sei stato da noi? Sii il primo a lasciare un commento.',
     revFormH: 'Lascia una recensione',
+    gTitle: 'Recensisci su Google', gText: 'Hai un account Google? Lascia la tua recensione lì: aiuta altri clienti a trovarci.', gWrite: 'Scrivi una recensione su Google', gSee: 'Vedi le recensioni su Google',
+    scroll: 'Scorri',
     revStatic: 'Raccontaci la tua esperienza: lascia una recensione su Google oppure inviacela su WhatsApp o via email. Le più belle le pubblichiamo qui.',
     revGoogle: 'Recensisci su Google', revWa: 'Invia su WhatsApp', revMail: 'Invia via email', revWaText: 'Ciao! Ecco la mia recensione di Castellarano Cover Center: ', revMailSubj: 'Recensione Castellarano Cover Center',
     revNote: 'La tua email serve solo a verificare il messaggio e non viene mai pubblicata. Il commento appare dopo la verifica.',
@@ -110,6 +114,8 @@ const T = {
     galleryK: 'The shop', galleryH: 'Inside Castellarano Cover Center', gallerySub: 'Walls full of cases and display counters of accessories: here is what to expect.',
     reviewsK: 'Reviews', reviewsH: 'What customers say', noReviews: 'No published reviews yet. Visited us? Be the first to leave a comment.',
     revFormH: 'Leave a review',
+    gTitle: 'Review us on Google', gText: 'Have a Google account? Leave your review there: it helps other customers find us.', gWrite: 'Write a Google review', gSee: 'See our Google reviews',
+    scroll: 'Scroll',
     revStatic: 'Tell us about your visit: review us on Google, or send it to us on WhatsApp or by email. We publish the best ones here.',
     revGoogle: 'Review on Google', revWa: 'Send on WhatsApp', revMail: 'Send by email', revWaText: 'Hi! Here is my review of Castellarano Cover Center: ', revMailSubj: 'Review of Castellarano Cover Center',
     revNote: 'Your email is only used to verify the message and is never published. Comments appear after review.',
@@ -162,8 +168,8 @@ function head(c, t, { title, desc, path, ld = [], noindex = false, preload = '' 
 }
 
 // Brand mark from castellarano-cover-animated.svg, inlined so it can use the self-hosted font and page CSS (animation lives in style.css).
-const LOGO_VB = '100 116 824 168';
-export const brandmark = (anim = false) => `<svg class="brandmark${anim ? ' anim' : ''}" viewBox="${LOGO_VB}" aria-hidden="true" focusable="false"><g class="bm-glow" transform="translate(90 90) scale(2.2)"><path class="bm-arc" d="M73 30.7 A30 30 0 1 0 73 69.3" fill="none" stroke="#22E678" stroke-width="12" stroke-linecap="round"/><polygon class="bm-bolt" points="54,30 38,54 49,54 45,70 62,45 51,45 56,30" fill="#22E678"/></g><text class="bm-t" x="340" y="215" font-size="104" font-weight="700" letter-spacing="-4" fill="#fff">castellarano</text><text class="bm-t" x="346" y="268" font-size="34" font-weight="500" letter-spacing="21" fill="#22E678">COVER</text></svg>`;
+const LOGO_VB = '100 116 824 176';
+export const brandmark = (anim = false) => `<svg class="brandmark${anim ? ' anim' : ''}" viewBox="${LOGO_VB}" aria-hidden="true" focusable="false"><g class="bm-glow" transform="translate(90 90) scale(2.2)"><path class="bm-arc" d="M73 30.7 A30 30 0 1 0 73 69.3" fill="none" stroke="#22E678" stroke-width="12" stroke-linecap="round"/><polygon class="bm-bolt" points="54,30 38,54 49,54 45,70 62,45 51,45 56,30" fill="#22E678"/></g><text class="bm-t" x="340" y="215" font-size="104" font-weight="700" letter-spacing="-4" fill="#fff">castellarano</text><text class="bm-t" x="346" y="276" font-size="60" font-weight="700" textLength="566" lengthAdjust="spacing" fill="#22E678">COVER</text></svg>`;
 const logo = (t) => `<a class="logo" href="${t.home}" aria-label="${esc(biz.name)}">${brandmark(true)}</a>`;
 
 function header(t, withNav = true) {
@@ -175,7 +181,7 @@ function footer(t) {
   return `<footer class="foot"><div class="wrap fgrid">
 <div><p class="flogo" role="img" aria-label="${esc(biz.name)}">${brandmark()}</p><p>${t.footAbout}</p></div>
 <div><h2 class="fh">${t.addressL}</h2><address>${esc(biz.street)}<br>${biz.zip} ${biz.city} (${biz.region})</address><p><a class="fmap" href="${mapLink}" target="_blank" rel="noopener">${icon('googlemaps')} ${t.openMap}</a></p></div>
-<div><h2 class="fh">${t.contactL}</h2><ul class="flist"><li><a href="tel:${biz.phone}">${icon('phone')} ${esc(biz.phoneDisplay)}</a></li><li><a href="${wa('')}" target="_blank" rel="noopener">${icon('whatsapp')} WhatsApp</a></li><li><a href="mailto:${esc(biz.email)}">${icon('mail')} ${esc(biz.email)}</a></li><li><a href="${esc(biz.instagram)}" target="_blank" rel="me noopener">${icon('instagram')} @cover.castellarano</a></li></ul></div>
+<div><h2 class="fh">${t.contactL}</h2><ul class="flist"><li><a href="tel:${biz.phone}">${icon('phone')} ${esc(biz.phoneDisplay)}</a></li><li><a href="${wa('')}" target="_blank" rel="noopener">${icon('whatsapp')} WhatsApp</a></li><li><a href="mailto:${esc(biz.email)}">${icon('mail')} ${esc(biz.email)}</a></li><li><a href="${esc(biz.instagram)}" target="_blank" rel="me noopener">${icon('instagram')} @cover.castellarano</a></li><li><a href="${googleWrite()}" target="_blank" rel="noopener">${icon('google')} ${t.gTitle}</a></li></ul></div>
 </div><div class="wrap"><div class="fbottom"><p>© ${new Date().getFullYear()} ${esc(biz.name)} · ${t.footer}</p><p><a href="${t.privacy}">${t.privacyLink}</a> · <a href="${t.alt}">${t.langName}</a></p></div></div></footer>`;
 }
 
@@ -192,7 +198,7 @@ export function home(c, t) {
     name: biz.name, alternateName: 'Castellarano Cover Center – Pellicole e Accessori Telefonia',
     url: c.base + '/', logo: c.base + '/icon-512.png', image: [`${c.base}/img/og.jpg`, ...PHOTOS.gallery.map(img)],
     description: T.en.desc, telephone: biz.phone, email: biz.email, hasMap: biz.mapsShort,
-    sameAs: [biz.instagram], knowsLanguage: ['it', 'en'], priceRange: '€',
+    sameAs: [biz.instagram, `https://www.google.com/maps?cid=${biz.googleCid}`], knowsLanguage: ['it', 'en'], priceRange: '€',
     areaServed: AREA.map((name) => ({ '@type': 'City', name })),
     address: { '@type': 'PostalAddress', streetAddress: biz.street, postalCode: biz.zip, addressLocality: biz.city, addressRegion: biz.region, addressCountry: 'IT' },
     hasOfferCatalog: { '@type': 'OfferCatalog', name: 'In-store products', itemListElement: cats.map((x) => ({ '@type': 'Offer', availability: 'https://schema.org/InStoreOnly', itemOffered: { '@type': 'Product', name: x.title_en, description: x.desc_en } })) },
@@ -241,8 +247,9 @@ ${header(t)}
 
 <section id="reviews" class="sec alt"><div class="wrap rgrid"><div>
 <div class="shead reveal">${kicker(t.reviewsK)}<h2>${t.reviewsH}</h2></div>${avg}
-<ul class="revs">${reviews.length ? reviews.map((r) => `<li class="rev reveal">${r.photo ? `<img class="rphoto" src="/uploads/${esc(r.photo)}" alt="${esc(r.name)}" loading="lazy" width="400" height="300">` : ''}<p class="stars" role="img" aria-label="${r.rating}/5">${stars(r.rating)}</p><p class="body">${esc(r.body)}</p><p class="who"><span class="avatar" aria-hidden="true">${esc(r.name.charAt(0).toUpperCase())}</span>${esc(r.name)} · <time datetime="${r.created_at.slice(0, 10)}">${new Date(r.created_at.replace(' ', 'T') + 'Z').toLocaleDateString(t.locale)}</time></p></li>`).join('') : `<li class="empty reveal"><span class="ebig">${icon('message-circle')}</span><p class="stars" aria-hidden="true">★★★★★</p><p>${t.noReviews}</p><a class="btn sm" href="#review-form">${icon('star')} ${t.revFormH}</a></li>`}</ul></div>
-${c.static ? `<div class="form reveal" id="review-form"><h3>${t.revFormH}</h3><p class="sub">${t.revStatic}</p><div class="rbtns"><a class="btn maps" href="${mapLink}" target="_blank" rel="noopener">${icon('googlemaps')} ${t.revGoogle}</a><a class="btn wa" href="${wa(t.revWaText)}" target="_blank" rel="noopener">${icon('whatsapp')} ${t.revWa}</a><a class="btn ghost dk" href="mailto:${esc(biz.email)}?subject=${encodeURIComponent(t.revMailSubj)}">${icon('mail')} ${t.revMail}</a></div></div>` : `<form class="form reveal" method="post" action="/review" id="review-form"><h3>${t.revFormH}</h3><p class="sub">${t.revNote}</p>${msg}
+<ul class="revs">${reviews.length ? reviews.map((r) => `<li class="rev reveal">${r.photo ? `<img class="rphoto" src="/uploads/${esc(r.photo)}" alt="${esc(r.name)}" loading="lazy" width="400" height="300">` : ''}<p class="stars" role="img" aria-label="${r.rating}/5">${stars(r.rating)}</p><p class="body">${esc(r.body)}</p><p class="who"><span class="avatar" aria-hidden="true">${esc(r.name.charAt(0).toUpperCase())}</span>${esc(r.name)} · <time datetime="${r.created_at.slice(0, 10)}">${new Date(r.created_at.replace(' ', 'T') + 'Z').toLocaleDateString(t.locale)}</time></p></li>`).join('') : `<li class="empty reveal"><span class="ebig">${icon('message-circle')}</span><p class="stars" aria-hidden="true">★★★★★</p><p>${t.noReviews}</p><a class="btn sm" href="#review-form">${icon('star')} ${t.revFormH}</a></li>`}</ul>
+${c.static ? '' : `<div class="gcard reveal"><span class="gbub">${icon('google')}</span><div><h3>${t.gTitle}</h3><p>${t.gText}</p><div class="gbtns"><a class="btn google" href="${googleWrite()}" target="_blank" rel="noopener">${icon('google')} ${t.gWrite}</a><a class="glink" href="${googlePlace()}" target="_blank" rel="noopener">${t.gSee} →</a></div></div></div>`}</div>
+${c.static ? `<div class="form reveal" id="review-form"><h3>${t.revFormH}</h3><p class="sub">${t.revStatic}</p><div class="rbtns"><a class="btn google" href="${googleWrite()}" target="_blank" rel="noopener">${icon('google')} ${t.revGoogle}</a><a class="btn wa" href="${wa(t.revWaText)}" target="_blank" rel="noopener">${icon('whatsapp')} ${t.revWa}</a><a class="btn ghost dk" href="mailto:${esc(biz.email)}?subject=${encodeURIComponent(t.revMailSubj)}">${icon('mail')} ${t.revMail}</a></div></div>` : `<form class="form reveal" method="post" action="/review" id="review-form"><h3>${t.revFormH}</h3><p class="sub">${t.revNote}</p>${msg}
 <input type="hidden" name="lang" value="${L}">
 <p class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></p>
 <div class="frow"><label>${t.fName}<input name="name" required minlength="2" maxlength="40" autocomplete="given-name"></label>
@@ -262,7 +269,7 @@ ${hours}
 
 <section id="faq" class="sec alt"><div class="wrap narrowc"><div class="shead center reveal">${kicker(t.faqK)}<h2>${t.faqH}</h2></div>${t.faq.map(([qq, a]) => `<details class="reveal"><summary>${qq}</summary><p>${esc(a)}</p></details>`).join('')}</div></section>
 </main>${footer(t)}
-<nav class="dock" aria-label="Quick contact"><a class="call" href="tel:${biz.phone}">${icon('phone')}<span>${t.call}</span></a><a class="wa" href="${wa(t.waText)}" target="_blank" rel="noopener">${icon('whatsapp')}<span>${t.whatsapp}</span></a><a class="maps" href="${mapLink}" target="_blank" rel="noopener">${icon('googlemaps')}<span>${t.directions}</span></a></nav><script src="/app.js?v=${asset.v}" defer></script></body></html>`;
+<nav class="dock" aria-label="Quick contact"><a class="call" href="tel:${biz.phone}">${icon('phone')}<span>${t.call}</span></a><a class="wa" href="${wa(t.waText)}" target="_blank" rel="noopener">${icon('whatsapp')}<span>${t.whatsapp}</span></a><a class="maps" href="${mapLink}" target="_blank" rel="noopener">${icon('googlemaps')}<span>${t.directions}</span></a></nav><a class="scrollcue" href="#products" hidden aria-label="${t.scroll}"><span>${t.scroll}</span>${icon('chevron-down')}</a><script src="/app.js?v=${asset.v}" defer></script></body></html>`;
 }
 
 export function privacy(c, t) {
