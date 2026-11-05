@@ -29,3 +29,10 @@ Environment variables:
 Back up `DATA_DIR/store.db` and `DATA_DIR/uploads/` regularly.
 
 `config.js` holds the address and defaults; phone, email, Instagram, hours, banner, products and reviews are editable in the admin.
+
+## GitHub Pages (free, static)
+
+Pushing to `main` runs `.github/workflows/pages.yml`: tests, `npm run build:static`, publish `dist/`.
+The static version has **no server**: reviews come from `content/reviews.json` (see `content/README.md`), the review form becomes
+Google / WhatsApp / email buttons, and there is no admin page (edit `content/*.json` on github.com instead).
+For a custom domain, add it in Settings → Pages and set the repository variable `SITE_URL` to `https://your-domain`.

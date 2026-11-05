@@ -52,6 +52,8 @@ const T = {
     galleryK: 'Il negozio', galleryH: 'Dentro Castellarano Cover Center', gallerySub: 'Pareti piene di cover e vetrine di accessori: ecco cosa ti aspetta.',
     reviewsK: 'Recensioni', reviewsH: 'Cosa dicono i clienti', noReviews: 'Ancora nessuna recensione pubblicata. Sei stato da noi? Sii il primo a lasciare un commento.',
     revFormH: 'Lascia una recensione',
+    revStatic: 'Raccontaci la tua esperienza: lascia una recensione su Google oppure inviacela su WhatsApp o via email. Le più belle le pubblichiamo qui.',
+    revGoogle: 'Recensisci su Google', revWa: 'Invia su WhatsApp', revMail: 'Invia via email', revWaText: 'Ciao! Ecco la mia recensione di Castellarano Cover Center: ', revMailSubj: 'Recensione Castellarano Cover Center',
     revNote: 'La tua email serve solo a verificare il messaggio e non viene mai pubblicata. Il commento appare dopo la verifica.',
     fName: 'Nome', fEmail: 'Email', fRating: 'Voto', fBody: 'Commento', fConsent: 'Accetto il trattamento dei dati come descritto nella', fPrivacy: 'informativa privacy', fSend: 'Invia recensione',
     ok: 'Grazie! Il tuo commento sarà pubblicato dopo la verifica.',
@@ -108,6 +110,8 @@ const T = {
     galleryK: 'The shop', galleryH: 'Inside Castellarano Cover Center', gallerySub: 'Walls full of cases and display counters of accessories: here is what to expect.',
     reviewsK: 'Reviews', reviewsH: 'What customers say', noReviews: 'No published reviews yet. Visited us? Be the first to leave a comment.',
     revFormH: 'Leave a review',
+    revStatic: 'Tell us about your visit: review us on Google, or send it to us on WhatsApp or by email. We publish the best ones here.',
+    revGoogle: 'Review on Google', revWa: 'Send on WhatsApp', revMail: 'Send by email', revWaText: 'Hi! Here is my review of Castellarano Cover Center: ', revMailSubj: 'Review of Castellarano Cover Center',
     revNote: 'Your email is only used to verify the message and is never published. Comments appear after review.',
     fName: 'Name', fEmail: 'Email', fRating: 'Rating', fBody: 'Comment', fConsent: 'I agree to my data being processed as described in the', fPrivacy: 'privacy notice', fSend: 'Send review',
     ok: 'Thank you! Your comment will be published after review.',
@@ -239,8 +243,8 @@ ${header(t)}
 
 <section id="reviews" class="sec alt"><div class="wrap rgrid"><div>
 <div class="shead reveal">${kicker(t.reviewsK)}<h2>${t.reviewsH}</h2></div>${avg}
-<ul class="revs">${reviews.length ? reviews.map((r) => `<li class="rev reveal">${r.photo ? `<img class="rphoto" src="/uploads/${r.photo}" alt="${esc(r.name)}" loading="lazy" width="400" height="300">` : ''}<p class="stars" role="img" aria-label="${r.rating}/5">${stars(r.rating)}</p><p class="body">${esc(r.body)}</p><p class="who"><span class="avatar" aria-hidden="true">${esc(r.name.charAt(0).toUpperCase())}</span>${esc(r.name)} · <time datetime="${r.created_at.slice(0, 10)}">${new Date(r.created_at.replace(' ', 'T') + 'Z').toLocaleDateString(t.locale)}</time></p></li>`).join('') : `<li class="empty reveal"><span class="ebig">${icon('message-circle')}</span><p class="stars" aria-hidden="true">★★★★★</p><p>${t.noReviews}</p><a class="btn sm" href="#review-form">${icon('star')} ${t.revFormH}</a></li>`}</ul></div>
-<form class="form reveal" method="post" action="/review" id="review-form"><h3>${t.revFormH}</h3><p class="sub">${t.revNote}</p>${msg}
+<ul class="revs">${reviews.length ? reviews.map((r) => `<li class="rev reveal">${r.photo ? `<img class="rphoto" src="/uploads/${esc(r.photo)}" alt="${esc(r.name)}" loading="lazy" width="400" height="300">` : ''}<p class="stars" role="img" aria-label="${r.rating}/5">${stars(r.rating)}</p><p class="body">${esc(r.body)}</p><p class="who"><span class="avatar" aria-hidden="true">${esc(r.name.charAt(0).toUpperCase())}</span>${esc(r.name)} · <time datetime="${r.created_at.slice(0, 10)}">${new Date(r.created_at.replace(' ', 'T') + 'Z').toLocaleDateString(t.locale)}</time></p></li>`).join('') : `<li class="empty reveal"><span class="ebig">${icon('message-circle')}</span><p class="stars" aria-hidden="true">★★★★★</p><p>${t.noReviews}</p><a class="btn sm" href="#review-form">${icon('star')} ${t.revFormH}</a></li>`}</ul></div>
+${c.static ? `<div class="form reveal" id="review-form"><h3>${t.revFormH}</h3><p class="sub">${t.revStatic}</p><div class="rbtns"><a class="btn" href="${mapLink}" target="_blank" rel="noopener">${icon('googlemaps')} ${t.revGoogle}</a><a class="btn wa" href="${wa(t.revWaText)}" target="_blank" rel="noopener">${icon('whatsapp')} ${t.revWa}</a><a class="btn ghost dk" href="mailto:${esc(biz.email)}?subject=${encodeURIComponent(t.revMailSubj)}">${icon('mail')} ${t.revMail}</a></div></div>` : `<form class="form reveal" method="post" action="/review" id="review-form"><h3>${t.revFormH}</h3><p class="sub">${t.revNote}</p>${msg}
 <input type="hidden" name="lang" value="${L}">
 <p class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></p>
 <div class="frow"><label>${t.fName}<input name="name" required minlength="2" maxlength="40" autocomplete="given-name"></label>
@@ -248,7 +252,7 @@ ${header(t)}
 <label>${t.fEmail}<input name="email" type="email" required maxlength="120" autocomplete="email" inputmode="email"></label>
 <label>${t.fBody}<textarea name="body" required minlength="10" maxlength="600" rows="4"></textarea></label>
 <label class="check"><input type="checkbox" name="consent" value="1" required> <span>${t.fConsent} <a href="${t.privacy}">${t.fPrivacy}</a></span></label>
-<button class="btn" type="submit">${icon('message-circle')} ${t.fSend}</button></form></div></section>
+<button class="btn" type="submit">${icon('message-circle')} ${t.fSend}</button></form>`}</div></section>
 
 <section id="visit" class="sec"><div class="wrap"><div class="shead reveal">${kicker(t.visitK)}<h2>${t.visitH}</h2><p class="sub">${t.near}</p></div>
 <div class="vgrid"><div class="vcard reveal">

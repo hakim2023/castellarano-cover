@@ -1,0 +1,44 @@
+[
+  {
+    "icon": "smartphone",
+    "title_it": "Cover e custodie a libro",
+    "title_en": "Wallet cases and covers",
+    "desc_it": "Per iPhone, Samsung e tanti altri modelli, in molti colori e fantasie.",
+    "desc_en": "For iPhone, Samsung and many other models, in many colours and prints."
+  },
+  {
+    "icon": "shield-check",
+    "title_it": "Pellicole protettive",
+    "title_en": "Screen protectors",
+    "desc_it": "Per proteggere lo schermo del tuo telefono.",
+    "desc_en": "Protect your phone screen."
+  },
+  {
+    "icon": "plug-zap",
+    "title_it": "Caricabatterie e cavi",
+    "title_en": "Chargers and cables",
+    "desc_it": "Cavi USB, Type-C e Lightning, caricatori da muro e da auto.",
+    "desc_en": "USB, Type-C and Lightning cables, wall and car chargers."
+  },
+  {
+    "icon": "battery-charging",
+    "title_it": "Power bank",
+    "title_en": "Power banks",
+    "desc_it": "Per non restare mai senza batteria.",
+    "desc_en": "Never run out of battery."
+  },
+  {
+    "icon": "headphones",
+    "title_it": "Cuffie e auricolari",
+    "title_en": "Headphones and earphones",
+    "desc_it": "Cuffie wireless, auricolari e accessori audio.",
+    "desc_en": "Wireless headphones, earphones and audio accessories."
+  },
+  {
+    "icon": "car",
+    "title_it": "Accessori per auto e selfie stick",
+    "title_en": "Car accessories and selfie sticks",
+    "desc_it": "Supporti per telefono, caricatori auto, selfie stick e altro.",
+    "desc_en": "Phone holders, car chargers, selfie sticks and more."
+  }
+]
