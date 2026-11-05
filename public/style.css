@@ -342,3 +342,9 @@ p{margin:0 0 1em}
 .flist a[href*="instagram"] .ic{background:linear-gradient(135deg,#6d3fc9,#c13584 60%,#d9442f)}
 .flist a[href^="mailto:"] .ic{background:#475569}
 .fmap .ic{box-sizing:content-box;padding:6px;border-radius:50%;width:1em;height:1em;color:#fff;background:var(--c-maps)}
+
+/* calmer hero: no button row, more breathing room */
+.hcopy .lead{margin-bottom:0}
+.hcopy .facts{margin-top:32px}
+.hero{padding:56px 0 64px}
+@media(min-width:960px){.hero{padding:96px 0 112px}}

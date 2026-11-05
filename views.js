@@ -216,17 +216,15 @@ ${header(t)}
 <div class="hcopy"><p class="pill rise">${icon('map-pin')} ${t.eyebrow}</p>
 <h1 class="rise">${t.h1a} <span class="hl">${t.h1b}</span></h1>
 <p class="lead rise">${t.lead}</p>
-<div class="cta rise"><a class="btn wa pulse" href="${wa(t.waText)}" target="_blank" rel="noopener">${icon('whatsapp')} ${t.whatsapp}</a><a class="btn call" href="tel:${biz.phone}">${icon('phone')} ${t.call}</a><a class="btn maps" href="${mapLink}" target="_blank" rel="noopener">${icon('googlemaps')} <span><span class="hide-s">Google </span>Maps</span></a><a class="btn ig iconly" href="${esc(biz.instagram)}" target="_blank" rel="me noopener" aria-label="Instagram @cover.castellarano" title="Instagram">${icon('instagram')}</a></div>
-<ul class="facts rise">${t.facts.map(([i, s]) => `<li>${icon(i)} ${s}</li>`).join('')}</ul></div>
+<ul class="facts rise">${[t.facts[0], t.facts[2]].map(([i, s]) => `<li>${icon(i)} ${s}</li>`).join('')}</ul></div>
 <div class="hvis rise" aria-hidden="true">
 <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
 <div class="orbit o1"><span class="sat a0"><i>${icon('headphones')}</i></span><span class="sat a180"><i>${icon('battery-charging')}</i></span></div>
-<div class="orbit o2"><span class="sat a60"><i>${icon('plug-zap')}</i></span><span class="sat a180"><i>${icon('shield-check')}</i></span><span class="sat a300"><i>${icon('car')}</i></span></div>
 <div class="phone"><span class="notch"></span><div class="screen">
 <svg class="brandmark anim pmark" viewBox="0 0 100 100"><g class="bm-glow"><path class="bm-arc" d="M71 33 A27 27 0 1 0 71 67" fill="none" stroke="#22E678" stroke-width="10" stroke-linecap="round"/><polygon class="bm-bolt" points="54,30 38,54 49,54 45,70 62,45 51,45 56,30" fill="#22E678"/></g></svg>
 <p class="pname">castellarano<span>COVER</span></p><span class="pbar"><i></i></span></div></div>
 <div class="chip c1"><span class="cbub">${icon('smartphone')}</span>${t.chip1}</div>
-<div class="chip c2">${stats.count ? `<span class="stars">★</span> ${stats.avg.toFixed(1)} / 5` : `<span class="cbub">${icon('store')}</span>${t.chip2}`}</div></div>
+</div>
 </div></section>
 <div class="marquee" aria-hidden="true"><div class="track">${words}${words}${words}${words}</div></div>
 
