@@ -67,7 +67,7 @@ fs.writeFileSync(path.join(out, 'business-card.html'), card);
 // Standalone QR: SVG for print (scales to any size), PNG rendered below for screens/social posts.
 fs.writeFileSync(path.join(out, 'qr-code.svg'), qrSvg(qrUrl));
 const qrPage = path.join(os.tmpdir(), 'cover-qr.html');
-fs.writeFileSync(qrPage, `<!doctype html><html><body style="margin:0">${qrSvg(qrUrl).replace('<svg ', '<svg width="1024" height="1024" ')}</body></html>`);
+fs.writeFileSync(qrPage, `<!doctype html><html><head><style>html,body{margin:0;overflow:hidden}svg{display:block}</style></head><body>${qrSvg(qrUrl).replace("<svg ", "<svg width=\"1024\" height=\"1024\" ")}</body></html>`);
 
 // Social share image 1200x630.
 const og = `<!doctype html><html><head><meta charset="utf-8"><style>${base}

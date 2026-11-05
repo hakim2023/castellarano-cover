@@ -1,8 +1,7 @@
 name: Deploy to GitHub Pages
 
+# Manual only: the live site is on Netlify. Run from the Actions tab if you switch back to GitHub Pages.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
