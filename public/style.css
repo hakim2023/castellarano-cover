@@ -178,7 +178,7 @@ p{margin:0 0 1em}
 .vcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px;box-shadow:var(--shadow);display:grid;gap:20px;align-content:start}
 .info{display:flex;gap:14px}.info h3{margin:2px 0 4px;font-size:1rem}.info p,.info address{margin:0;font-style:normal;color:var(--muted)}
 .ibub{display:grid;place-items:center;flex:none;width:44px;height:44px;border-radius:12px;background:var(--brand-soft);color:var(--brand)}
-.vbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}.vbtns .btn{padding:0 14px}.vbtns .btn:last-child{grid-column:1/-1}
+.vbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}.vbtns .btn{padding:0 14px}
 @media(max-width:379px){.vbtns{grid-template-columns:1fr}}
 .map{width:100%;height:100%;min-height:360px;border:0;border-radius:var(--r);box-shadow:var(--shadow);background:var(--alt)}
 
@@ -322,3 +322,23 @@ p{margin:0 0 1em}
 .brandmark{direction:ltr}
 .abtn{white-space:nowrap}
 @media(max-width:559px){.alogo{width:34px;overflow:hidden;flex:none;direction:ltr}.alogo .brandmark{height:34px;max-width:none}.atop .abtn{padding:0 12px;min-height:38px;font-size:.85rem}.alangs a{min-width:36px}}
+
+/* brand-coloured contact buttons: Call blue, WhatsApp green, Maps red (Google pin), Instagram gradient */
+:root{--c-call:#2563eb;--c-wa:#15803d;--c-maps:#d93025;--c-ig:#c13584}
+.btn.call{background:var(--c-call);border-color:var(--c-call);color:#fff}
+.btn.wa{background:var(--c-wa);border-color:var(--c-wa);color:#fff}
+.btn.maps{background:var(--c-maps);border-color:var(--c-maps);color:#fff}
+.btn.ig{background:linear-gradient(135deg,#6d3fc9 0%,#c13584 55%,#d9442f 100%);border-color:transparent;color:#fff}
+.btn.call:hover{box-shadow:0 10px 22px rgba(37,99,235,.45)}
+.btn.wa:hover{box-shadow:0 10px 22px rgba(21,128,61,.45)}
+.btn.maps:hover{box-shadow:0 10px 22px rgba(217,48,37,.4)}
+.btn.ig:hover{box-shadow:0 10px 22px rgba(193,53,132,.45)}
+.btn .ic{width:1.25em;height:1.25em}
+.dock a.call{background:var(--c-call)}.dock a.wa{background:var(--c-wa)}.dock a.maps{background:var(--c-maps)}
+/* footer contact lists: each icon sits in its brand-coloured badge */
+.flist a .ic{box-sizing:content-box;padding:6px;border-radius:50%;width:1em;height:1em;color:#fff}
+.flist a[href^="tel:"] .ic{background:var(--c-call)}
+.flist a[href*="wa.me"] .ic{background:var(--c-wa)}
+.flist a[href*="instagram"] .ic{background:linear-gradient(135deg,#6d3fc9,#c13584 60%,#d9442f)}
+.flist a[href^="mailto:"] .ic{background:#475569}
+.fmap .ic{box-sizing:content-box;padding:6px;border-radius:50%;width:1em;height:1em;color:#fff;background:var(--c-maps)}
